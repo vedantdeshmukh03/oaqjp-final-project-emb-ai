@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import os
-
 from flask import Flask, render_template_string, request
 
-from emotion_detection import emotion_detector
+from EmotionDetection.emotion_detection import emotion_detector
 
 app = Flask(__name__)
 
@@ -75,8 +73,8 @@ HTML_TEMPLATE = """
   <body>
     <div class="container">
       <h1>Emotion Detector</h1>
-      <form method="POST">
-        <textarea name="text" placeholder="Type a sentence to analyze...">{{ text or '' }}</textarea>
+      <form method="GET" action="/emotionDetector">
+        <textarea name="textToAnalyze" placeholder="Type a sentence to analyze...">{{ text or '' }}</textarea>
         <button type="submit">Analyze</button>
       </form>
 
@@ -103,23 +101,38 @@ HTML_TEMPLATE = """
 """
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/", methods=["GET"])
 def index():
     """Render the form and show emotion analysis results."""
+    text = request.args.get("textToAnalyze", "")
     result = None
-    text = ""
 
-    if request.method == "POST":
-        text = request.form.get("text", "")
-        if not text or not text.strip():
-            result = {"error": "Please enter some text."}
-        else:
-            if not os.getenv("WATSON_API_KEY") or not os.getenv("WATSON_URL"):
-                os.environ["WATSON_API_KEY"] = "demo-key"
-                os.environ["WATSON_URL"] = "https://example.com"
-            result = emotion_detector(text)
+    if text.strip():
+        result = emotion_detector(text)
 
     return render_template_string(HTML_TEMPLATE, text=text, result=result)
+
+
+@app.route("/emotionDetector", methods=["GET"])
+def emotion_detector_route():
+    """Return the dominant emotion and scores for the supplied text."""
+    text_to_analyse = request.args.get("textToAnalyze", "")
+
+    if text_to_analyse is None or not str(text_to_analyse).strip():
+        return "Invalid input! Try again."
+
+    result = emotion_detector(text_to_analyse)
+    if result is None:
+        return "Invalid input! Try again."
+
+    return (
+        f"anger: {result['anger']}\n"
+        f"disgust: {result['disgust']}\n"
+        f"fear: {result['fear']}\n"
+        f"joy: {result['joy']}\n"
+        f"sadness: {result['sadness']}\n"
+        f"dominant_emotion: {result['dominant_emotion']}"
+    )
 
 
 if __name__ == "__main__":

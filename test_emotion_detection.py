@@ -1,81 +1,149 @@
 import os
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
-from emotion_detection import emotion_detector
+from EmotionDetection.emotion_detection import emotion_detector
 
 
 class EmotionDetectorTests(unittest.TestCase):
     def setUp(self):
         os.environ["WATSON_API_KEY"] = "test-api-key"
-        os.environ["WATSON_URL"] = (
-            "https://us-south.natural-language-understanding.watson.cloud.ibm.com"
-        )
-    @patch("emotion_detection.NaturalLanguageUnderstandingV1")
-    def test_dominant_joy(self, mock_client):
-        response = {
+        os.environ["WATSON_URL"] = "https://us-south.ml.cloud.ibm.com/ml/v1/text/emotion?version=2022-02-01"
+
+    @patch("EmotionDetection.emotion_detection.requests.post")
+    def test_dominant_anger(self, mock_post):
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
             "emotion": {
                 "document": {
                     "emotion": {
-                        "anger": 0.1,
-                        "disgust": 0.05,
-                        "fear": 0.02,
-                        "joy": 0.8,
+                        "anger": 0.8,
+                        "disgust": 0.1,
+                        "fear": 0.12,
+                        "joy": 0.3,
+                        "sadness": 0.2,
+                    }
+                }
+            }
+        }
+        mock_post.return_value = mock_response
+
+        result = emotion_detector("I am furious and angry.")
+
+        self.assertEqual(result["dominant_emotion"], "anger")
+        self.assertAlmostEqual(result["anger"], 0.8)
+
+    @patch("EmotionDetection.emotion_detection.requests.post")
+    def test_dominant_disgust(self, mock_post):
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "emotion": {
+                "document": {
+                    "emotion": {
+                        "anger": 0.2,
+                        "disgust": 0.9,
+                        "fear": 0.1,
+                        "joy": 0.06,
                         "sadness": 0.15,
                     }
                 }
             }
         }
-        mock_client.return_value.analyze.return_value.get_result.return_value = response
+        mock_post.return_value = mock_response
 
-        result = emotion_detector("I am very happy and excited today.")
+        result = emotion_detector("This is disgusting and revolting.")
 
-        self.assertEqual(result["dominant_emotion"], "joy")
-        self.assertAlmostEqual(result["joy"], 0.8)
+        self.assertEqual(result["dominant_emotion"], "disgust")
+        self.assertAlmostEqual(result["disgust"], 0.9)
 
-    @patch("emotion_detection.NaturalLanguageUnderstandingV1")
-    def test_dominant_sadness(self, mock_client):
-        response = {
+    @patch("EmotionDetection.emotion_detection.requests.post")
+    def test_dominant_fear(self, mock_post):
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
             "emotion": {
                 "document": {
                     "emotion": {
                         "anger": 0.12,
                         "disgust": 0.08,
-                        "fear": 0.2,
-                        "joy": 0.1,
-                        "sadness": 0.75,
+                        "fear": 0.84,
+                        "joy": 0.05,
+                        "sadness": 0.17,
                     }
                 }
             }
         }
-        mock_client.return_value.analyze.return_value.get_result.return_value = response
+        mock_post.return_value = mock_response
+
+        result = emotion_detector("I am terrified and afraid of what happens next.")
+
+        self.assertEqual(result["dominant_emotion"], "fear")
+        self.assertAlmostEqual(result["fear"], 0.84)
+
+    @patch("EmotionDetection.emotion_detection.requests.post")
+    def test_dominant_joy(self, mock_post):
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "emotion": {
+                "document": {
+                    "emotion": {
+                        "anger": 0.04,
+                        "disgust": 0.02,
+                        "fear": 0.01,
+                        "joy": 0.88,
+                        "sadness": 0.09,
+                    }
+                }
+            }
+        }
+        mock_post.return_value = mock_response
+
+        result = emotion_detector("I feel happy and excited today.")
+
+        self.assertEqual(result["dominant_emotion"], "joy")
+        self.assertAlmostEqual(result["joy"], 0.88)
+
+    @patch("EmotionDetection.emotion_detection.requests.post")
+    def test_dominant_sadness(self, mock_post):
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "emotion": {
+                "document": {
+                    "emotion": {
+                        "anger": 0.14,
+                        "disgust": 0.07,
+                        "fear": 0.16,
+                        "joy": 0.05,
+                        "sadness": 0.82,
+                    }
+                }
+            }
+        }
+        mock_post.return_value = mock_response
 
         result = emotion_detector("I feel lonely and heartbroken after losing my friend.")
 
         self.assertEqual(result["dominant_emotion"], "sadness")
-        self.assertAlmostEqual(result["sadness"], 0.75)
+        self.assertAlmostEqual(result["sadness"], 0.82)
 
-    @patch("emotion_detection.NaturalLanguageUnderstandingV1")
-    def test_dominant_anger(self, mock_client):
-        response = {
-            "emotion": {
-                "document": {
-                    "emotion": {
-                        "anger": 0.9,
-                        "disgust": 0.12,
-                        "fear": 0.05,
-                        "joy": 0.03,
-                        "sadness": 0.18,
-                    }
-                }
-            }
-        }
-        mock_client.return_value.analyze.return_value.get_result.return_value = response
+    @patch("EmotionDetection.emotion_detection.requests.post")
+    def test_bad_request_returns_none_values(self, mock_post):
+        mock_response = Mock()
+        mock_response.status_code = 400
+        mock_post.return_value = mock_response
 
-        result = emotion_detector("I am furious and angry because someone stole my wallet.")
+        result = emotion_detector("I am very happy.")
 
-        self.assertEqual(result["dominant_emotion"], "anger")
-        self.assertAlmostEqual(result["anger"], 0.9)
+        self.assertIsNone(result["anger"])
+        self.assertIsNone(result["disgust"])
+        self.assertIsNone(result["fear"])
+        self.assertIsNone(result["joy"])
+        self.assertIsNone(result["sadness"])
+        self.assertIsNone(result["dominant_emotion"])
 
 
 if __name__ == "__main__":

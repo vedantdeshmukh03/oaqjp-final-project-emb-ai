@@ -1,5 +1,5 @@
-"""Import the emotion detector for the package."""
+"""Public package interface for the Emotion Detector."""
 
-from emotion_detection import emotion_detector
+from EmotionDetection.emotion_detection import emotion_detector
 
 __all__ = ["emotion_detector"]

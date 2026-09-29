@@ -1,11 +1,14 @@
-# Emotion Detector
+# Final Project
 
-A Flask-based web application that analyzes written text and identifies the dominant emotion using IBM Watson Natural Language Understanding.
+This repository contains the IBM Skills Network Final Project: Emotion Detector.
+
+The application analyzes text and identifies the dominant emotion using the IBM Watson EmotionPredict API through a Python requests-based HTTP call.
 
 ## Technologies
 
 - Python
 - Flask
+- Requests
 - Watson NLP
 - unittest
 - pylint
@@ -20,14 +23,12 @@ A Flask-based web application that analyzes written text and identifies the domi
    python -m pip install -r requirements.txt
    ```
 
-4. Set environment variables for IBM Watson:
+4. Configure the required IBM Watson environment variables:
 
    ```bash
    set WATSON_API_KEY=your_api_key
-   set WATSON_URL=https://your-service-url
+   set WATSON_URL=https://us-south.ml.cloud.ibm.com/ml/v1/text/emotion?version=2022-02-01
    ```
-
-   If the Watson credentials are not configured in the local environment, the application falls back to a demo response so the interface can still be tested visually.
 
 ## Run the application
 
@@ -44,11 +45,11 @@ http://localhost:5000
 ## Run tests
 
 ```bash
-python -m unittest -v
+python -m unittest discover -v
 ```
 
 ## Run pylint
 
 ```bash
-python -m pylint emotion_detection.py server.py
+python -m pylint server.py EmotionDetection/emotion_detection.py
 ```
