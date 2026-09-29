@@ -1,0 +1,2 @@
+emotion_detection imported successfully
+{'anger': 0.1, 'disgust': 0.05, 'fear': 0.02, 'joy': 0.8, 'sadness': 0.15, 'dominant_emotion': 'joy'}

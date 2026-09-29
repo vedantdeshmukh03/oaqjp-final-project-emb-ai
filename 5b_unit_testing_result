@@ -1,0 +1,8 @@
+test_dominant_anger (test_emotion_detection.EmotionDetectorTests.test_dominant_anger) ... ok
+test_dominant_joy (test_emotion_detection.EmotionDetectorTests.test_dominant_joy) ... ok
+test_dominant_sadness (test_emotion_detection.EmotionDetectorTests.test_dominant_sadness) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.007s
+
+OK
